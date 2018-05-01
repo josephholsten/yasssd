@@ -1,0 +1,6 @@
+#!/bin/sh
+
+go get -u github.com/kardianos/govendor
+go get -u github.com/golang/lint/golint
+
+govendor sync
