@@ -2,7 +2,24 @@
 
 `yasssd` is a service to provide a basic storage service. It's almost certainly inapropriate to your needs, see the Alternatives section for something more appropriate.
 
-## The 
+## The Simplest Thing That Could Possibly Work
+
+```
+$ go run main.go & # start service
+
+$ curl -X POST                   localhost:8080/register  -d '{"username":"bib","password":"secretiv"}'  # create an account
+$ curl -X POST                   localhost:8080/login     -d '{"username":"bib","password":"secretiv"}'  # request session token
+{"token":1}
+$ curl -X PUT    -H "X-Token: 1" localhost:8080/files/foo -d "foo-file-contents"                         # create
+$ curl -X GET    -H "X-Token: 1" localhost:8080/files/foo                                                # read
+foo-file-contents
+$ curl -X GET    -H "X-Token: 1" localhost:8080/files                                                    # list
+[
+  "foo"
+]
+$ curl -X PUT    -H "X-Token: 1" localhost:8080/files/foo -d "foo-file-contents"                         # update
+$ curl -X DELETE -H "X-Token: 1" localhost:8080/files/foo                                                # delete
+```
 
 ## Alternatives
 
