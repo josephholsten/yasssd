@@ -29,7 +29,6 @@ type RequestTestData struct {
 func TestRequests(t *testing.T) {
 	Tests := []RequestTestData{
 		{"POST", "/register", nil, strings.NewReader(`{"username": "pat", "password":"secretiv"}`), 204, "", ""},
-
 		{"POST", "/register", nil, strings.NewReader(`{"username": "p", "password":"secretiv"}`), 400, "application/json", errorResp("username too short, must be at least 3 characters")},
 		{"POST", "/register", nil, strings.NewReader(`{"username": "123456789012345678901", "password":"secretiv"}`), 400, "application/json", errorResp("username too long, must be no more than 20 characters")},
 		{"POST", "/register", nil, strings.NewReader(`{"username": "pat*", "password":"secretiv"}`), 400, "application/json", errorResp("username contains invalid characters, must contain only alphanumeric characters")},
@@ -37,13 +36,20 @@ func TestRequests(t *testing.T) {
 		{"POST", "/register", nil, nil, 400, "application/json", errorResp("request body was empty, expected json with username and password fields")},
 
 		{"POST", "/login", nil, strings.NewReader(`{"username": "pat", "password":"secretiv"}`), 200, "application/json", `{"token":"1"}`},
-		{"GET", "/login", nil, nil, 400, "application/json", errorResp("unexpected method:GET")},
+		{"POST", "/login", nil, strings.NewReader(`{"username": "pat", "password":"incorrect-password"}`), 403, "application/json", "{\n  \"error\": \"Invalid username and password\"\n}"},
 
-		{"GET", "/files", map[string][]string{"X-Token": []string{"1"}}, nil, 200, "application/json", ""},
-		{"GET", "/files", map[string][]string{"X-Token": []string{"non-existant"}}, nil, 403, "application/json", "{\n  \"error\": \"session token not recognized\"\n}"},
+		{"PUT", "/files/new-file", map[string][]string{"X-Token": []string{"1"}}, strings.NewReader("foo-file-contents"), 201, "", ""},
 
 		{"GET", "/files/foo", map[string][]string{"X-Token": []string{"1"}}, nil, 200, "application/json", "foo-file-contents"},
 		{"GET", "/files/foo", map[string][]string{"X-Token": []string{"non-existant"}}, nil, 403, "application/json", "{\n  \"error\": \"session token not recognized\"\n}"},
+		{"GET", "/files/non-existant", map[string][]string{"X-Token": []string{"1"}}, nil, 404, "", ""},
+
+		{"DELETE", "/files/foo", map[string][]string{"X-Token": []string{"1"}}, nil, 204, "", ""},
+		{"DELETE", "/files/foo", map[string][]string{"X-Token": []string{"non-existant"}}, nil, 403, "application/json", "{\n  \"error\": \"session token not recognized\"\n}"},
+		{"DELETE", "/files/non-existant", map[string][]string{"X-Token": []string{"1"}}, nil, 404, "", ""},
+
+		{"GET", "/files", map[string][]string{"X-Token": []string{"1"}}, nil, 200, "application/json", "[\n  \"foo\" \n]"},
+		{"GET", "/files", map[string][]string{"X-Token": []string{"non-existant"}}, nil, 403, "application/json", "{\n  \"error\": \"session token not recognized\"\n}"},
 	}
 
 	for _, test := range Tests {
