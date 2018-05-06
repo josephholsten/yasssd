@@ -5,7 +5,9 @@
 ## The Simplest Thing That Could Possibly Work
 
 ```
-$ go run main.go & # start service
+$ ./script/bootstrap # install dependencies
+$ ./script/build     # build executable
+$ ./yasssd &         # start service
 
 $ curl -X POST                   localhost:8080/register  -d '{"username":"bib","password":"secretiv"}'  # create an account
 $ curl -X POST                   localhost:8080/login     -d '{"username":"bib","password":"secretiv"}'  # request session token
